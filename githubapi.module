@@ -1,0 +1,156 @@
+<?php
+
+/**
+ * This module provides github API integration.
+ *
+ * @author Gor Martsen <gor@me.com>
+ */
+
+ // URL Github API.
+define('GITHUB_API_URI', 'https://api.github.com');
+
+// URL Github.
+define('GITHUB_URI', 'https://github.com');
+
+define('GITHUB_SCOPE', 'user:email,repo,admin:repo_hook,read:org,admin:org_hook');
+define('GITHUB_HOOK_NAME', 'web');
+define('GITHUB_PAYLOAD_PATH', 'githubapi/payload');
+define('GITHUB_PAYLOAD_CONTENT_TYPE', 'json');
+
+/**
+ * Implements hook_config_info().
+ */
+function githubapi_config_info() {
+  $prefixes['githubapi.settings'] = array(
+    'label' => t('github API settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function githubapi_menu() {
+  $items = array();
+
+  $items['admin/config/system/githubapi'] = array(
+    'title' => 'github API settings',
+    'page callback' => 'githubapi_repos',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'githubapi.page.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  $items['admin/config/system/githubapi/list'] = array(
+    'title' => 'Repos list',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/config/system/githubapi/settings'] = array(
+    'title' => 'github API settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('githubapi_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Github API configuration.',
+    'file' => 'githubapi.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/config/system/githubapi/%/delete'] = array(
+    'title' => 'Remove hook',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('githubapi_hook_remove', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Github API configuration.',
+    'file' => 'githubapi.page.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  
+  $items['githubapi/register'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Connect to Github',
+    'page callback' => 'githubapi_get_access_token',
+    'access callback' => TRUE,
+    'file' => 'githubapi.admin.inc',
+  );
+
+  $items['githubapi/payload'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Payload callback',
+    'page callback' => 'githubapi_payload_process',
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+function gitlc_github_rid_load($rid){
+  return db_select('githubapi_repositories', 'gr')
+    ->fields('gr')
+    ->condition('id', $rid)
+    ->execute()
+    ->fetchObject();
+}
+
+/**
+ * Implements https://developer.github.com/webhooks/#payloads.
+ */
+function githubapi_payload_process() {
+  if (isset($_SERVER['HTTP_X_GITHUB_EVENT'])) {
+    $received_json = file_get_contents('php://input', TRUE);
+
+    if (!$event = json_decode($received_json)) {
+      return '';
+    }
+
+    $event_name = isset($_SERVER['HTTP_X_GITHUB_EVENT']) ? $_SERVER['HTTP_X_GITHUB_EVENT'] : NULL;
+
+    if ($event_name) {
+      $sender = $event->sender;
+      $repository = $event->repository;
+      
+      if(isset($repository->owner->login)){
+        $repository->owner->name = $repository->owner->login;
+      }
+      
+      $repo = db_select('githubapi_repositories', 'gr')
+        ->fields('gr')
+        ->condition('name', $repository->name)
+        ->condition('owner', $repository->owner->name)
+        ->execute()
+        ->fetchObject();
+    
+      unset($event->repository);
+      unset($event->sender);
+
+      $record = array(
+        'type' => $event_name,
+        'sender' => $sender,
+        'rid' => $repo->id,
+        'data' => $event,
+        'timestamp' => REQUEST_TIME,
+      );
+      backdrop_write_record('githubapi_payload', $record);
+
+      module_invoke_all('githubapi_payload', $event_name, $record, $repo);
+    }
+  }
+}
+
+function githubapi_get_class($repo){
+  module_load_include('inc', 'githubapi', 'githubapi_class');
+
+  $config = config('githubapi.settings');
+  $token = $config->get('token');
+
+  $githubapi = new GithubAPI();
+  $githubapi->setOwnerName($repo->owner);
+  $githubapi->setRepoName($repo->name);
+  $githubapi->setToken($token);
+  return $githubapi;
+}
