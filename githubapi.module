@@ -234,3 +234,12 @@ function githubapi_get_class($repo){
   $githubapi->setToken($token);
   return $githubapi;
 }
+
+function githubapi_get_token(){
+  $config = config('githubapi.settings');
+  $token = settings_get('githubapi_token');
+  if(empty($token)){
+    $token = $config->get('token');
+  }
+  return $token;
+}
