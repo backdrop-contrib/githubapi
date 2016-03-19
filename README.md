@@ -26,6 +26,8 @@ This module provide API and settings to connect your website with your github or
     $settings['githubapi_client_id'] = 'YOUR_APP_CLIENT_ID';
     ```
     When client_id or client_secret stored via settings.php , you are not able to edit it on settings page.
+    
+  - setup private filesystem path. We are caching each GET request to GithubAPI for AGE provided by answer.
   
   - Now you need to provide token to your github Application, and there is two way:
     - Just click "Authorize an Application" on admin/config/system/githubapi/settings page and grant access to your account token.
