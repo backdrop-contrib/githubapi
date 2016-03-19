@@ -156,6 +156,7 @@ function githubapi_payload_process() {
         ->condition('owner', $owner_name)
         ->execute()
         ->fetchObject();
+      $repo->name = '';
       if(empty($repo)){
         backdrop_add_http_header('Status', '403 We do not process this repo.');
         exit('We did not find repo information.');
@@ -174,6 +175,7 @@ function githubapi_payload_process() {
           ->condition('owner', $owner_name)
           ->execute()
           ->fetchObject();
+        $repo->name = $repository_name;
       }        
       if(empty($repo)){
         backdrop_add_http_header('Status', '403 We do not process this repo.');
@@ -202,6 +204,8 @@ function githubapi_payload_process() {
         'timestamp' => REQUEST_TIME,
       );
       backdrop_write_record('githubapi_payload', $record);
+      
+      
 
       module_invoke_all('githubapi_payload', $event_name, $record, $repo);
 
