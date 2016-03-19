@@ -352,5 +352,14 @@ class GithubAPI
     $settings[':repo'] = $this->repo_name;
     return $this->postRequest('repos/:owner/:repo/issues/:number/comments', $settings);
   }
+  
+  public function getReadme(){
+    $readme = $this->getRequest('repos/:owner/:repo/readme');
+    if(!empty($readme->content)){
+      return base64_decode($readme->content);
+    }
+    return FALSE;
+  }
+
 
 }
