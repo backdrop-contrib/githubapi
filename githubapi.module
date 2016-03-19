@@ -219,7 +219,10 @@ function githubapi_get_class($repo){
   module_load_include('inc', 'githubapi', 'githubapi_class');
 
   $config = config('githubapi.settings');
-  $token = $config->get('token');
+  $token = settings_get('githubapi_token');
+  if(empty($token)){
+    $token = $config->get('token');
+  }
 
   $githubapi = new GithubAPI();
   $githubapi->setOwnerName($repo->owner);
