@@ -6,8 +6,7 @@ require_once 'libraries/php-curl-class/src/Curl/Curl.php';
 
 
 
-class GithubAPI
-{
+class GithubAPI {
 
   protected $curl = FALSE;
   protected $token = FALSE;
@@ -42,8 +41,7 @@ class GithubAPI
     $this->repo_name = $repo_name;
   }
 
-  public function setDebug($debug = FALSE)
-  {
+  public function setDebug($debug = FALSE) {
     $this->debug = $debug;
   }
 
@@ -72,7 +70,7 @@ class GithubAPI
   }
 
   public function getErrors() {
-    if($this->isError()){
+    if ($this->isError()) {
       return array (
         'code' => $this->curl->curlErrorCode,
         'message' => $this->curl->curlErrorMessage,
@@ -90,7 +88,7 @@ class GithubAPI
   protected function prepareCacheFolder() {
     $root_folder = 'private://github_cache/';
 
-    if(!$client_folder = $this->getToken()){
+    if (!$client_folder = $this->getToken()) {
       $client_folder = 'uid-0';
     }
 
@@ -105,13 +103,13 @@ class GithubAPI
 
   private function getResponseAge() {
     global $user;
-    if($this->age){
+    if ($this->age) {
       return $this->age;
     }
-    if($age_header = $this->curl->responseHeaders['Cache-Control']){
+    if ($age_header = $this->curl->responseHeaders['Cache-Control']) {
       list($type, $maxage, $smaxage) = explode(',', $age_header);
       list($name,$age) = explode('=', $maxage);
-      if($user->uid == 0){
+      if ($user->uid == 0) {
         // Default max age is 60. Let's cache for anonymous users for 5 min.
         $age = $age * 5;
       }
@@ -121,7 +119,7 @@ class GithubAPI
   }
 
   private function cacheRequest($command, $params) {
-    if($this->disable_cache){
+    if ($this->disable_cache) {
       return FALSE;
     }
     $serialize_object = serialize(array('command' => $command, 'params' => $params));
@@ -137,7 +135,7 @@ class GithubAPI
   }
 
   private function getCacheRequest($command, $params) {
-    if($this->disable_cache){
+    if ($this->disable_cache) {
       return FALSE;
     }
     $serialize_object = serialize(array('command' => $command, 'params' => $params));
@@ -149,18 +147,19 @@ class GithubAPI
 
     if (file_exists($filename)) {
       $timestamp = filemtime($filename);
-      if($contents = @json_decode(file_get_contents($filename))){
-        if(($timestamp + $contents->age) > REQUEST_TIME){
+      if ($contents = @json_decode(file_get_contents($filename))) {
+        if (($timestamp + $contents->age) > REQUEST_TIME) {
 
           $this->cache_expiration = $timestamp + $contents->age;
 
-          if($this->debug) {
+          if ($this->debug) {
             backdrop_set_message('Cache returned!');
           }
           return $contents->response;
-        }else{
-          if($this->debug) {
-            backdrop_set_message('No cache returned!'. ($timestamp + $contents->age) . '>'.REQUEST_TIME);
+        }
+        else {
+          if ($this->debug) {
+            backdrop_set_message('No cache returned!'. ($timestamp + $contents->age) . '>'. REQUEST_TIME);
           }
         }
       }
@@ -173,10 +172,10 @@ class GithubAPI
   }
 
   protected function getResponse() {
-    if($this->debug) {
+    if ($this->debug) {
       backdrop_set_message('<pre>'.print_r($this->testingGetHeaders(), true).'</pre>');
     }
-    if($this->isError()){
+    if ($this->isError()) {
       return FALSE;
     }
 
@@ -187,14 +186,14 @@ class GithubAPI
 
     $this->prepareCommand($command, $params);
 
-    if($this->getToken()){
+    if ($this->getToken()) {
       $params['access_token'] = $this->getToken();
     }
 
     // Add default 1000 per page.
     $params['per_page'] = $this->per_page;
 
-    if($response = $this->getCacheRequest($command, $params)){
+    if ($response = $this->getCacheRequest($command, $params)) {
       return $response;
     }
 
@@ -209,7 +208,7 @@ class GithubAPI
     $params['committer'] = $this->getCommittrer();
     $this->prepareCommand($command, $params);
 
-    $query='';
+    $query = '';
     if($this->getToken()){
       $query = '?access_token=' . $this->getToken();
     }
@@ -222,8 +221,8 @@ class GithubAPI
   protected function postRequest($command, $params = array()) {
 
     $this->prepareCommand($command, $params);
-    $query='';
-    if($this->getToken()){
+    $query = '';
+    if ($this->getToken()) {
       $query = '?access_token=' . $this->getToken();
     }
     $this->curl->post(GITHUB_API_URI . '/' . $command . $query, $params);
@@ -235,8 +234,8 @@ class GithubAPI
 
     $this->prepareCommand($command, $params);
 
-    $query='';
-    if($this->getToken()){
+    $query = '';
+    if ($this->getToken()) {
       $query = '?access_token=' . $this->getToken();
     }
 
@@ -247,8 +246,8 @@ class GithubAPI
 
 
   private function prepareCommand(&$command, &$params) {
-    foreach($params as $key => $val){
-      if($key[0] == ':'){
+    foreach ($params as $key => $val) {
+      if ($key[0] == ':') {
         $command = str_replace($key, $val, $command);
         unset($params[$key]);
       }
@@ -278,7 +277,7 @@ class GithubAPI
   public function getOrg($org_name) {
     return $this->getRequest(
         'orgs/:org', array(
-        ':org' => $org_name,
+          ':org' => $org_name,
         )
     );
   }
@@ -286,7 +285,7 @@ class GithubAPI
   public function getOrgsRepos($org_name) {
     return $this->getRequest(
         'orgs/:org/repos', array(
-        ':org' => $org_name,
+          ':org' => $org_name,
         )
     );
   }
@@ -294,8 +293,8 @@ class GithubAPI
   public function getRepo() {
     return $this->getRequest(
         'repos/:owner/:repo', array(
-        ':owner' => $this->owner_name,
-        ':repo' => $this->repo_name,
+          ':owner' => $this->owner_name,
+          ':repo' => $this->repo_name,
         )
     );
   }
@@ -309,9 +308,9 @@ class GithubAPI
   public function deleteHook($id) {
     return $this->deleteRequest(
         'repos/:owner/:repo/hooks/:id', array(
-        ':owner' => $this->owner_name,
-        ':repo' => $this->repo_name,
-        ':id' => $id,
+          ':owner' => $this->owner_name,
+          ':repo' => $this->repo_name,
+          ':id' => $id,
         )
     );
   }
@@ -325,8 +324,8 @@ class GithubAPI
   public function deleteOrgHook($id) {
     return $this->deleteRequest(
         'orgs/:org/hooks/:id', array(
-        ':org' => $this->owner_name,
-        ':id' => $id,
+          ':org' => $this->owner_name,
+          ':id' => $id,
         )
     );
   }
@@ -334,9 +333,9 @@ class GithubAPI
   public function getCommit($sha) {
     return $this->getRequest(
         'repos/:owner/:repo/commits/:sha', array(
-        ':owner' => $this->owner_name,
-        ':repo' => $this->repo_name,
-        ':sha' => $sha,
+          ':owner' => $this->owner_name,
+          ':repo' => $this->repo_name,
+          ':sha' => $sha,
         )
     );
   }
@@ -355,7 +354,7 @@ class GithubAPI
   
   public function getReadme(){
     $readme = $this->getRequest('repos/:owner/:repo/readme');
-    if(!empty($readme->content)){
+    if (!empty($readme->content)) {
       return base64_decode($readme->content);
     }
     return FALSE;
