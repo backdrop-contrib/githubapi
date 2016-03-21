@@ -6,7 +6,7 @@ require_once 'libraries/php-curl-class/src/Curl/Curl.php';
 
 
 
-class GithubAPI
+class GitHubAPI
 {
 
   protected $curl = FALSE;
