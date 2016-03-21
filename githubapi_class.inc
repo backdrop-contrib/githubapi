@@ -29,7 +29,7 @@ class GitHubAPI {
   public function reInitCurl() {
     $this->curl = new Curl();
     $this->curl->setHeader('Content-Type', 'application/json');
-    $this->curl->setUserAgent('http://git.lc application');
+    $this->curl->setUserAgent('Backdrop CMS GitHub API module');
     $this->curl->setHeader('Accept', '*/*');
   }
 
