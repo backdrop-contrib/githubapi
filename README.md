@@ -50,31 +50,31 @@ function github_issues_githubapi_payload($event_name, $record, $repo){
 
   switch ($event_name) {
     case 'push':
-      foreach($record['data']->commits as $commit){
+      foreach($payload['data']['commits'] as $commit){
         $match = NULL;
         $message = '';
-        preg_match_all($expr, $commit->message, $match);
+        preg_match_all($expr, $commit['message'], $match);
         if(!empty($match[1])){
           foreach($match[1] as $issue){
             $message .= GITHUB_ISSUES_ISSUES_REPO . '#' . $issue . " ";
           }
           if(!empty($message)){
-            github_issues_commit_comment_add($commit->id, $message, $repo);
+            borg_github_issues_commit_comment_add($commit['id'], $message, $repo);
           }
         }
       }
       break;
     case 'pull_request':
-      if($record['data']->action == 'opened'){
+      if($payload['data']['action'] == 'opened'){
         $message = '';
-        preg_match_all($expr, $record['data']->pull_request->title . ' ' . $record['data']->pull_request->body, $match);
+        preg_match_all($expr, $payload['data']['pull_request']['title'] . ' ' . $payload['pull_request']['body'], $match);
         if(!empty($match[1])){
           foreach($match[1] as $issue){
             $message .= GITHUB_ISSUES_ISSUES_REPO . '#' . $issue . " ";
           }
-  
+
           if(!empty($message)){
-            github_issues_issue_comment_add($record['data']->number, $message, $repo);
+            borg_github_issues_issue_comment_add($payload['number'], $message, $repo);
           }
         }
       }
