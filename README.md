@@ -1,6 +1,9 @@
 #Githubapi - Github API integration module
 This module provide API and settings to connect your website with your github organisations and repositories via github API and Github Application.
 
+## Under active development
+It's early alpha release. GitHubAPI class is limited now to fullfill backdropcms.org needs only.
+When issue #8 will be implemented, I am going to release Beta1.
 
 
 ##Installation
