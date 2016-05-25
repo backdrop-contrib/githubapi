@@ -51,7 +51,7 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
     ->condition('uid', $account->uid)
     ->execute()
     ->fetchObject();
-              
+
   if($user->uid == $account->uid){
     if($githubapi_sso){
       $githubapi_sso_status = backdrop_get_form('githubapi_sso_unlink', $githubapi_sso);
@@ -61,7 +61,7 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
   }else{
     if($githubapi_sso){
       $githubapi_sso_status = array(
-        '#markup' => t('Connected to GitHub account !name', 
+        '#markup' => t('Connected to GitHub account !name',
           array('!name' => l($githubapi_sso->name, 'https://github.com/' . $githubapi_sso->name))),
       );
     }
@@ -72,7 +72,6 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
 /**
  * Alter user login form.
  */
-
 function githubapi_sso_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   $form['links']['#items'][] = l(t('Login with GitHub account'), 'user/githubapi_sso');
 
@@ -89,19 +88,22 @@ function githubapi_sso_link($form, &$form_state, $account) {
   return $form;
 }
 
+/**
+ * Process Github connect form submission.
+ */
 function githubapi_sso_link_submit($form, &$form_state) {
   githubapi_sso_redirect_to_github();
 }
 
 function githubapi_sso_redirect_to_github() {
   global $base_url;
-  
+
   $config = config('githubapi.settings');
   $params = array();
 
   $client_id = settings_get('githubapi_client_id');
   if(empty($client_id)){
-    $client_id = $config->get('client_id');  
+    $client_id = $config->get('client_id');
   }
   $params['client_id'] = $client_id;
 
@@ -121,13 +123,17 @@ function githubapi_sso_redirect_to_github() {
  */
 function githubapi_sso_unlink($form, &$form_state, $githubapi_sso) {
   $form_state['githubapi_sso'] = $githubapi_sso;
-  
+
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Disconnect !name GitHub account', array('!name' => $githubapi_sso->name)),
   );
   return $form;
 }
+
+/**
+ * Process Github disconnect form submission.
+ */
 function githubapi_sso_unlink_submit($form, &$form_state) {
   $githubapi_sso = $form_state['githubapi_sso'];
   backdrop_set_message(t('GitHub account Disconnected.'));
@@ -187,16 +193,19 @@ function githubapi_sso_get_access_token() {
   backdrop_goto('user');
 }
 
+/**
+ * Process login and attach github login to user name.
+ *
+ * @param $user_info array that contain github user data.
+ */
 function github_sso_login($user_info){
   global $user;
-  backdrop_set_message(t('It\'s a placeholder.'));
-  backdrop_set_message('<pre>' . print_r($user_info, true). '</pre>');
   $githubapi_sso = db_select('githubapi_sso_login', 'gsl')
     ->fields('gsl')
     ->condition('name', $user_info['login'])
     ->execute()
     ->fetchObject();
-  
+
   if($githubapi_sso) {
     // This login already assigned.
     $account = user_load($githubapi_sso->uid);
@@ -214,19 +223,19 @@ function github_sso_login($user_info){
     // This login is not assigned and we are not logged in.
     // Sounds like new user are registerring.
     $account = user_load_by_name($user_info['login']);
-    
+
     if($account){
       backdrop_set_message(t('Login !name already registered. Please login or register first.', array('!name' => $user_info['login'])));
       backdrop_goto('');
     }
-    
+
     $account = user_load_by_mail($user_info['email']);
-    
+
     if($account){
       backdrop_set_message(t('Email !name already registered. Please login or register first.', array('!name' => $user_info['email'])));
       backdrop_goto('');
     }
-    
+
     // We don't have any account with email or login match github. Let's register new one!
     $userinfo = array(
       'name' => $user_info['login'],
@@ -235,19 +244,19 @@ function github_sso_login($user_info){
       'status' => config_get('system.core', 'user_register') == USER_REGISTER_VISITORS,
       'roles' => array(),
     );
-  
+
     $account = entity_create('user', $userinfo);
     $account->save();
-    
+
     db_insert('githubapi_sso_login')
       ->fields(array(
         'uid' => $account->uid,
         'name' => $user_info['login'],
       ))
       ->execute();
-    
+
     watchdog('user', 'New user: %name (%email).', array('%name' => $account->name, '%email' => $account->mail), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $account->uid . '/edit'));
-    
+
     if (!config_get('system.core', 'user_email_verification') && $account->status) {
       _user_mail_notify('register_no_approval_required', $account);
       backdrop_set_message(t('Registration successful. You are now logged in.'));
