@@ -67,7 +67,26 @@ function githubapi_sso_link($form, &$form_state, $account) {
 }
 
 function githubapi_sso_link_submit($form, &$form_state) {
+  global $base_url;
+  
+  $config = config('githubapi.settings');
+  $params = array();
 
+  $client_id = settings_get('githubapi_client_id');
+  if(empty($client_id)){
+    $client_id = $config->get('client_id');  
+  }
+  $params['client_id'] = $client_id;
+
+  $params['scope'] = GITHUB_SSO_SCOPE;
+
+  $params['redirect_uri'] = $base_url . '/githubapi/register/sso';
+
+  $query = http_build_query($params);
+
+  $link = GITHUB_URI . '/login/oauth/authorize?' . $query;
+
+  backdrop_goto($link, array('absolute' => TRUE));
 }
 
 /**
@@ -111,15 +130,13 @@ function githubapi_sso_get_access_token() {
 
     if (isset($result['access_token'])) {
       $token = $result['access_token'];
-      $config->set('token', $token);
-      $config->save();
-      backdrop_set_message(t('We connected to GitHub now .'));
-      backdrop_goto('admin/config/system/githubapi/settings');
+      backdrop_set_message(t('We connected to GitHub now .' . $token));
+      backdrop_goto('user');
     }
   }
   // If we didn't get a token or code, connection to Github failed.
   backdrop_set_message(t('Failed connecting to GitHub.'), 'error');
-  backdrop_goto('admin/config/system/githubapi/settings');
+  backdrop_goto('user');
 }
 
 /**
