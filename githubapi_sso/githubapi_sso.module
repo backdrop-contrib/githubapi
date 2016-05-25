@@ -104,6 +104,8 @@ function githubapi_sso_link($form, &$form_state, $account) {
  * Process Github connect form submission.
  */
 function githubapi_sso_link_submit($form, &$form_state) {
+  // Before redirect to github, let's clear session error from user login validation.
+  unset($_SESSION['messages']['error']);
   githubapi_sso_redirect_to_github();
 }
 
