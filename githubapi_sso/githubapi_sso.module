@@ -29,18 +29,27 @@ function githubapi_sso_menu() {
  * Implements hook_menu().
  */
 function githubapi_sso_user_view($account, $view_mode, $langcode) {
+  global $user;
   $githubapi_sso_status = '';
-  
   $githubapi_sso = db_select('githubapi_sso_login', 'gsl')
-            ->fields('gsl')
-            ->condition('uid', $account->uid)
-            ->execute()
-            ->fetchObject();
-  
-  if($githubapi_sso){
-    $githubapi_sso_status = backdrop_get_form('githubapi_sso_unlink', $githubapi_sso);
+    ->fields('gsl')
+    ->condition('uid', $account->uid)
+    ->execute()
+    ->fetchObject();
+              
+  if($user->uid == $account->uid){
+    if($githubapi_sso){
+      $githubapi_sso_status = backdrop_get_form('githubapi_sso_unlink', $githubapi_sso);
+    }else{
+      $githubapi_sso_status = backdrop_get_form('githubapi_sso_link', $account);
+    }
   }else{
-    $githubapi_sso_status = backdrop_get_form('githubapi_sso_link', $account);
+    if($githubapi_sso){
+      $githubapi_sso_status = array(
+        '#markup' => t('Connected to GitHub account !name', 
+          array('!name' => $githubapi_sso->name )),
+      );
+    }
   }
   $account->content['githubapi_sso'] = $githubapi_sso_status;
 }
@@ -49,11 +58,16 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
  * Display link to github button.
  */
 function githubapi_sso_link($form, &$form_state, $account) {
+  $form_state['account'] = $account;
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Connect GitHub account'),
   );
   return $form;
+}
+
+function githubapi_sso_link_submit($form, &$form_state) {
+
 }
 
 /**
@@ -79,12 +93,12 @@ function githubapi_sso_get_access_token() {
     if(empty($client_id)){
       $client_id = $config->get('client_id');
     }
-    
+
     $client_secret = settings_get('githubapi_client_secret');
     if(empty($client_secret)){
       $client_secret = $config->get('client_secret');
     }
-  
+
     $params = array();
     $params['client_id'] = $client_id;
     $params['client_secret'] = $client_secret;
@@ -128,7 +142,7 @@ function githubapi_sso_get_user_info($token) {
   $github_user = FALSE;
   if ($request->code == 200) {
     $github_user = drupal_json_decode($request->data);
-  
+
     if (empty($github_user['email'])) {
       $github_user_emails = githubapi_sso_get_user_emails($token);
       $first_email = reset($github_user_emails);
