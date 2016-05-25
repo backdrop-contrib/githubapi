@@ -167,7 +167,7 @@ function githubapi_sso_get_access_token() {
           ->execute();
       }
       else{
-        github_sso_login($user_info);
+        github_sso_login($user_info, $token);
       }
       backdrop_set_message(t('We connected to GitHub now.'));
       backdrop_goto('user');
@@ -190,9 +190,16 @@ function github_sso_login($user_info){
   
   if($githubapi_sso) {
     // This login already assigned.
-    $user = user_load($githubapi_sso->uid);
-    user_login_finalize();
-    backdrop_goto('user');
+    $account = user_load($githubapi_sso->uid);
+    if($account->status == 1){
+      $user = $account;
+      user_login_finalize();
+      backdrop_goto('user');
+    }
+    else{
+      backdrop_set_message(t('The account for %name has not been activated or is blocked.', array('%name' => $account->name)), 'error');
+      backdrop_goto('');
+    }
   }
   else{
     // This login is not assigned and we are not logged in.
@@ -222,6 +229,13 @@ function github_sso_login($user_info){
   
     $account = entity_create('user', $userinfo);
     $account->save();
+    
+    db_insert('githubapi_sso_login')
+      ->fields(array(
+        'uid' => $account->uid,
+        'name' => $user_info['login'],
+      ))
+      ->execute();
     
     watchdog('user', 'New user: %name (%email).', array('%name' => $account->name, '%email' => $account->mail), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $account->uid . '/edit'));
     
