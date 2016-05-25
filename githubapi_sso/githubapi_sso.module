@@ -132,13 +132,12 @@ function githubapi_sso_get_access_token() {
       $token = $result['access_token'];
       $user_info = githubapi_sso_get_user_info($token);
       if($user->uid > 0) {
-        backdrop_set_message('<pre>' . print_r($user_info, true). '</pre>');
-/*        db_insert('githubapi_sso_login')
+        db_insert('githubapi_sso_login')
           ->fields(array(
             'uid' => $user->uid,
-            'name' => $user_info->login,
+            'name' => $user_info['login'],
           ))
-          ->execute();*/
+          ->execute();
       }
       else{
         github_sso_login($user_info);
@@ -154,6 +153,7 @@ function githubapi_sso_get_access_token() {
 
 function github_sso_login($user_info){
   backdrop_set_message(t('It\'s a placeholder.'));
+  backdrop_set_message('<pre>' . print_r($user_info, true). '</pre>');
 }
 
 /**
