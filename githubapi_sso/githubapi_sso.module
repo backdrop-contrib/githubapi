@@ -22,6 +22,12 @@ function githubapi_sso_menu() {
     'access callback' => TRUE,
   );
 
+  $items['user/githubapi_sso'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Connect to Github',
+    'page callback' => 'githubapi_sso_redirect_to_github',
+    'access callback' => TRUE,
+  );
   return $items;
 }
 
@@ -59,11 +65,8 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
  */
 
 function githubapi_sso_form_user_login_block_alter(&$form, &$form_state, $form_id) {
-  backdrop_set_message('<pre>' . print_r($form, true). '</pre>');
-  $form['action']['github_api_sso'] = array(
-    '#type' => 'submit',
-    '#value' => t('Connect GitHub account'),
-  );
+  $form['links']['#items'][] = l(t('Login with GitHub account'), 'user/githubapi_sso');
+
 }
 
 /**
@@ -79,6 +82,10 @@ function githubapi_sso_link($form, &$form_state, $account) {
 }
 
 function githubapi_sso_link_submit($form, &$form_state) {
+  githubapi_sso_redirect_to_github();
+}
+
+function githubapi_sso_redirect_to_github() {
   global $base_url;
   
   $config = config('githubapi.settings');
