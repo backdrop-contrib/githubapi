@@ -95,7 +95,7 @@ function githubapi_sso_link_submit($form, &$form_state) {
 function githubapi_sso_unlink($form, &$form_state, $githubapi_sso) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Disconnect GitHub account'),
+    '#value' => t('Disconnect !name GitHub account', array('!name' => $githubapi_sso->name)),
   );
   return $form;
 }
