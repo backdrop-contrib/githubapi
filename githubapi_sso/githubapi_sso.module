@@ -201,12 +201,14 @@ function github_sso_login($user_info){
     
     if($account){
       backdrop_set_message(t('Login !name already registered. Please login or register first.', array('!name' => $user_info['login'])));
+      backdrop_goto('');
     }
     
     $account = user_load_by_mail($user_info['email']);
     
     if($account){
       backdrop_set_message(t('Email !name already registered. Please login or register first.', array('!name' => $user_info['email'])));
+      backdrop_goto('');
     }
     
     // We don't have any account with email or login match github. Let's register new one!
