@@ -47,7 +47,7 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
     if($githubapi_sso){
       $githubapi_sso_status = array(
         '#markup' => t('Connected to GitHub account !name', 
-          array('!name' => $githubapi_sso->name )),
+          array('!name' => l($githubapi_sso->name, 'https://github.com/' . $githubapi_sso->name))),
       );
     }
   }
@@ -104,7 +104,7 @@ function githubapi_sso_unlink($form, &$form_state, $githubapi_sso) {
  * Menu callback; Process an Github authentication.
  */
 function githubapi_sso_get_access_token() {
-
+  global $user;
   if (isset($_GET['code'])) {
     $config = config('githubapi.settings');
 
@@ -131,8 +131,18 @@ function githubapi_sso_get_access_token() {
     if (isset($result['access_token'])) {
       $token = $result['access_token'];
       $user_info = githubapi_sso_get_user_info($token);
-      backdrop_set_message('<pre>' . print_r($user_info,true) . '</pre>');
-      backdrop_set_message(t('We connected to GitHub now .' . $token));
+      if($user->uid > 0) {
+        db_insert('githubapi_sso_login')
+          ->fields(array(
+            'uid' => $user->uid,
+            'name' => $user_info->login,
+          ))
+          ->execute();
+      }
+      else{
+        github_sso_login($user_info);
+      }
+      backdrop_set_message(t('We connected to GitHub now.'));
       backdrop_goto('user');
     }
   }
