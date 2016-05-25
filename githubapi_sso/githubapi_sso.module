@@ -85,7 +85,7 @@ function githubapi_sso_form_user_login_alter(&$form, &$form_state, $form_id) {
     '#value' => t('Login with GitHub account'),
   );
   
-  $form['#submit'][] = 'githubapi_sso_link_submit';
+  $form['#validate'][] = 'githubapi_sso_link_submit';
 
 }
 
