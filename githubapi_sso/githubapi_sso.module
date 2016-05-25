@@ -70,11 +70,17 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
 }
 
 /**
- * Alter user login form.
+ * Alter user login block form.
  */
 function githubapi_sso_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   $form['links']['#items'][] = l(t('Login with GitHub account'), 'user/githubapi_sso');
+}
 
+/**
+ * Alter user login form.
+ */
+function githubapi_sso_form_user_login_alter(&$form, &$form_state, $form_id) {
+  backdrop_set_message('<pre>' . print_r($form, true). '</pre>');
 }
 
 /**
