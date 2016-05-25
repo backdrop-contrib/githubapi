@@ -193,7 +193,57 @@ function github_sso_login($user_info){
     $user = user_load($githubapi_sso->uid);
     user_login_finalize();
     backdrop_goto('user');
-  } 
+  }
+  else{
+    // This login is not assigned and we are not logged in.
+    // Sounds like new user are registerring.
+    $account = user_load_by_name($user_info['login']);
+    
+    if($account){
+      backdrop_set_message(t('Login !name already registered. Please login or register first.', array('!name' => $user_info['login'])));
+    }
+    
+    $account = user_load_by_mail($user_info['email']);
+    
+    if($account){
+      backdrop_set_message(t('Email !name already registered. Please login or register first.', array('!name' => $user_info['email'])));
+    }
+    
+    // We don't have any account with email or login match github. Let's register new one!
+    $userinfo = array(
+      'name' => $user_info['login'],
+      'mail' => $user_info['email'],
+      'pass' => user_password(),
+      'status' => config_get('system.core', 'user_register') == USER_REGISTER_VISITORS,
+      'roles' => array(),
+    );
+  
+    $account = entity_create('user', $userinfo);
+    $account->save();
+    
+    watchdog('user', 'New user: %name (%email).', array('%name' => $account->name, '%email' => $account->mail), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $account->uid . '/edit'));
+    
+    if (!config_get('system.core', 'user_email_verification') && $account->status) {
+      _user_mail_notify('register_no_approval_required', $account);
+      backdrop_set_message(t('Registration successful. You are now logged in.'));
+      $user = user_load($account->uid);
+      user_login_finalize();
+      backdrop_goto('user');
+    }
+    // No administrator approval required.
+    elseif ($account->status) {
+      $op = 'register_no_approval_required';
+      _user_mail_notify($op, $account);
+      backdrop_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      backdrop_goto('');
+    }
+    // Administrator approval required.
+    else {
+      _user_mail_notify('register_pending_approval', $account);
+      backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
+      backdrop_goto('');
+    }
+  }
 }
 
 /**
