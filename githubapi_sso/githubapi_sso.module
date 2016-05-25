@@ -151,6 +151,10 @@ function githubapi_sso_get_access_token() {
   backdrop_goto('user');
 }
 
+function github_sso_login($user_info){
+  backdrop_set_message(t('It\'s a placeholder.'));
+}
+
 /**
  * Get the user info provided by github.
  *
