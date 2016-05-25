@@ -73,7 +73,6 @@ function githubapi_sso_form_user_login_block_alter(&$form, &$form_state, $form_i
  * Display link to github button.
  */
 function githubapi_sso_link($form, &$form_state, $account) {
-  $form_state['account'] = $account;
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Connect GitHub account'),
@@ -112,11 +111,20 @@ function githubapi_sso_redirect_to_github() {
  * Display unlink to github button.
  */
 function githubapi_sso_unlink($form, &$form_state, $githubapi_sso) {
+  $form_state['githubapi_sso'] = $githubapi_sso;
+  
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Disconnect !name GitHub account', array('!name' => $githubapi_sso->name)),
   );
   return $form;
+}
+function githubapi_sso_unlink_submit($form, &$form_state) {
+  $githubapi_sso = $form_state['githubapi_sso'];
+  backdrop_set_message(t('GitHub account Disconnected.'));
+  db_delete('githubapi_sso_login')
+    ->condition('uid', $githubapi_sso->uid)
+    ->execute();
 }
 
 /**
