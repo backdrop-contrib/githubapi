@@ -171,8 +171,21 @@ function githubapi_sso_get_access_token() {
 }
 
 function github_sso_login($user_info){
+  global $user;
   backdrop_set_message(t('It\'s a placeholder.'));
   backdrop_set_message('<pre>' . print_r($user_info, true). '</pre>');
+  $githubapi_sso = db_select('githubapi_sso_login', 'gsl')
+    ->fields('gsl')
+    ->condition('name', $user_info['login'])
+    ->execute()
+    ->fetchObject();
+  
+  if($githubapi_sso) {
+    // This login already assigned.
+    $user = user_load($githubapi_sso->uid);
+    user_login_finalize();
+    backdrop_goto('user');
+  } 
 }
 
 /**
