@@ -156,7 +156,7 @@ function githubapi_sso_get_user_info($token) {
       'User-Agent' => GITHUB_API_USER_AGENT,
     ),
   );
-  $request = backdrop_http_reques(GITHUB_API_URI . '/user?access_token=' . $token, $options);
+  $request = backdrop_http_request(GITHUB_API_URI . '/user?access_token=' . $token, $options);
 
   $github_user = FALSE;
   if ($request->code == 200) {
@@ -186,7 +186,7 @@ function githubapi_sso_get_user_emails($token) {
       'User-Agent' => GITHUB_API_USER_AGENT,
     ),
   );
-  $request = backdrop_http_reques(GITHUB_API_URI . '/user/emails?access_token=' . $token, $options);
+  $request = backdrop_http_request(GITHUB_API_URI . '/user/emails?access_token=' . $token, $options);
 
   $github_user_emails = FALSE;
   if ($request->code == 200) {
