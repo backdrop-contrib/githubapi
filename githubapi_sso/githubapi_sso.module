@@ -80,7 +80,13 @@ function githubapi_sso_form_user_login_block_alter(&$form, &$form_state, $form_i
  * Alter user login form.
  */
 function githubapi_sso_form_user_login_alter(&$form, &$form_state, $form_id) {
-  backdrop_set_message('<pre>' . print_r($form, true). '</pre>');
+  $form['actions']['githubapi_sso'] = array(
+    '#type' => 'submit',
+    '#value' => t('Connect GitHub account'),
+  );
+  
+  $form['#submit'][] = 'githubapi_sso_link_submit';
+
 }
 
 /**
