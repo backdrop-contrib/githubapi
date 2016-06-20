@@ -132,7 +132,7 @@ class GitHubAPI {
   /**
    * Get Curl details if error happen.
    *
-   * @return 
+   * @return
    *   An array of request information. @see testingGetHeaders.
    *   FALSE if there is no error.
    */
@@ -272,7 +272,7 @@ class GitHubAPI {
   /**
    * Determine if request has been cached.
    *
-   * @return 
+   * @return
    *   FALSE if not and time when cache get expired in TIMESTAMP.
    */
   public function isCached() {
@@ -283,7 +283,7 @@ class GitHubAPI {
    * Determine if request has been cached.
    *
    * @access protected
-   * @return 
+   * @return
    *   FALSE if error. Object with answer if request success.
    */
   protected function getResponse() {
@@ -512,10 +512,10 @@ class GitHubAPI {
    *   An array of settings for hook
    *     - name: Must be passed as "web".
    *     - config: Key/Value:
-   *        - url: The URL to which the payloads will be delivered. 
+   *        - url: The URL to which the payloads will be delivered.
    *        - content_type: The media type used to serialize the payloads. Supported values include json and form. The default is form.
    *        - secret: If provided, payloads will be delivered with an X-Hub-Signature header.
-   *        - insecure_ssl: Determines whether the SSL certificate of the host for url will be verified when delivering payloads. 
+   *        - insecure_ssl: Determines whether the SSL certificate of the host for url will be verified when delivering payloads.
    *     - events: Determines what events the hook is triggered for. Default: ["push"].
    *     - active: Determines whether the hook is actually triggered on pushes.
    * @return
@@ -560,10 +560,10 @@ class GitHubAPI {
    *   An array of settings for hook
    *     - name: Must be passed as "web".
    *     - config: Key/Value:
-   *        - url: The URL to which the payloads will be delivered. 
+   *        - url: The URL to which the payloads will be delivered.
    *        - content_type: The media type used to serialize the payloads. Supported values include json and form. The default is form.
    *        - secret: If provided, payloads will be delivered with an X-Hub-Signature header.
-   *        - insecure_ssl: Determines whether the SSL certificate of the host for url will be verified when delivering payloads. 
+   *        - insecure_ssl: Determines whether the SSL certificate of the host for url will be verified when delivering payloads.
    *     - events: Determines what events the hook is triggered for. Default: ["push"].
    *     - active: Determines whether the hook is actually triggered on pushes.
    * @return
@@ -600,7 +600,7 @@ class GitHubAPI {
    * Get a single commit.
    * https://developer.github.com/v3/repos/commits/#get-a-single-commit
    *
-   * @param $sha 
+   * @param $sha
    *   hash for commit
    * @return
    *   Return commit information or FALSE if there is no access.
@@ -691,11 +691,11 @@ class GitHubAPI {
   public function getArchive($settings) {
     $settings[':owner'] = $this->owner_name;
     $settings[':repo'] = $this->repo_name;
-    
+
     if(!isset($settings[':archive_format']) || in_array($settings[':archive_format'], array('tarball', 'zipball'))) {
       $settings[':archive_format'] = 'zipball';
     }
-    
+
     if(!isset($settings[':ref'])) {
       $url = 'repos/:owner/:repo/:archive_format';
     }
@@ -712,7 +712,7 @@ class GitHubAPI {
       $content = $this->curl->response;
       return $content;
     }
-    
+
     return FALSE;
   }
   /**
@@ -728,7 +728,7 @@ class GitHubAPI {
   public function getReleases() {
     $settings[':owner'] = $this->owner_name;
     $settings[':repo'] = $this->repo_name;
-    
+
     return $this->getRequest('repos/:owner/:repo/releases', $settings);
   }
 }

@@ -62,6 +62,12 @@ function githubapi_repo_download($form, &$form_state, $rid){
       $options[$release->tag_name] = $release->name;
     }
   
+    /**
+     * form
+     * 
+     * @var mixed
+     * @access public
+     */
     $form['release'] = array(
       '#type' => 'select',
       '#title' => t('Select release to download'),
@@ -102,7 +108,6 @@ function githubapi_repo_download_submit($form, &$form_state) {
     backdrop_exit();
   }
   
-  file_put_contents("/tmp/". $form_state['values']['release'] . ".zip" , $code);
 }
 
 function githubapi_hook_remove($form, &$form_state, $rid){
