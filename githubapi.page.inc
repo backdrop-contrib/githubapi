@@ -51,14 +51,37 @@ function githubapi_repos(){
 function githubapi_repo_download($form, &$form_state, $rid){
   $repo = gitlc_github_rid_load($rid);
   
-//  backdrop_set_message('<pre>REPO: ' . print_r($repo,true). '</pre>'); 
-  
   $githubapi = githubapi_get_class($repo);
-  $githubapi->setDebug(TRUE);
-
   
-  $releases = $githubapi->getReleases();
-  backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');  
+  if($releases = $githubapi->getReleases()) {
+    backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');
+    $options = array();
+    
+    foreach($releases as $release) {
+      $options[$release->tag_name] = $release->name;
+    }
+  
+    $form['owner_repo_path'] = array(
+      '#type' => 'select',
+      '#title' => t('Select release to download'),
+      '#options' => $options,
+      '#description' => t('Please select release to download.'),
+    );
+    $form['actions']['#type'] = 'actions';
+    
+    
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Download'),
+    );
+
+  }
+  else{
+    backdrop_set_message(t('This repo contain no releases'), 'error');
+  }
+  
+  
+  return $form;
 
 }
 
