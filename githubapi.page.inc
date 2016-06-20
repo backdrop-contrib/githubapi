@@ -54,7 +54,7 @@ function githubapi_repo_download($form, &$form_state, $rid){
 //  backdrop_set_message('<pre>REPO: ' . print_r($repo,true). '</pre>'); 
   
   $githubapi = githubapi_get_class($repo);
-//  $githubapi->setDebug(TRUE);
+  $githubapi->setDebug(TRUE);
 
   
   $releases = $githubapi->getReleases();
