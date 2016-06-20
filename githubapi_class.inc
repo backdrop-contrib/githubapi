@@ -308,7 +308,7 @@ class GitHubAPI {
    * @return
    *   FALSE if request failed. Object if success.
    */
-  protected function getRequest($command, $params = array()) {
+  public function getRequest($command, $params = array()) {
 
     $this->prepareCommand($command, $params);
 
@@ -340,7 +340,7 @@ class GitHubAPI {
    * @return
    *   FALSE if request failed. Object if success.
    */
-  protected function putRequest($command, $params = array()) {
+  public function putRequest($command, $params = array()) {
 
     $params['committer'] = $this->getCommittrer();
     $this->prepareCommand($command, $params);
@@ -366,7 +366,7 @@ class GitHubAPI {
    * @return
    *   FALSE if request failed. Object if success.
    */
-  protected function postRequest($command, $params = array()) {
+  public function postRequest($command, $params = array()) {
 
     $this->prepareCommand($command, $params);
     $query='';
@@ -389,7 +389,7 @@ class GitHubAPI {
    * @return
    *   FALSE if request failed. Object if success.
    */
-  protected function deleteRequest($command, $params = array()) {
+  public function deleteRequest($command, $params = array()) {
 
     $this->prepareCommand($command, $params);
 
@@ -678,5 +678,40 @@ class GitHubAPI {
     }
     return FALSE;
   }
+  /**
+   * Get Archive file content by :ref from repository.
+   * https://developer.github.com/v3/repos/contents/#get-archive-link
+   *
+   * @return
+   *   Return content of the archive.
+   *
+   * @see SetRepoName
+   * @see SetOwnerName
+   */
+  public function getArchive($settings) {
+    $settings[':owner'] = $this->owner_name;
+    $settings[':repo'] = $this->repo_name;
+    
+    if(!isset($settings[':archive_format']) || in_array($settings[':archive_format'], array('tarball', 'zipball'))) {
+      $settings[':archive_format'] = 'zipball';
+    }
+    
+    if(!isset($settings[':ref'])) {
+      $url = 'repos/:owner/:repo/:archive_format';
+    }
+    else {
+      $url = 'repos/:owner/:repo/:archive_format/:ref';
+    }
 
+    // First request return 302 with linkg to download;
+    $this->getRequest($url);
+
+    if(isset($this->curl->responseHeaders['Location'])) {
+      $url = $this->curl->responseHeaders['Location'];
+      $content = $this->getRequest($url);
+      return $content;
+    }
+    
+    return FALSE;
+  }
 }
