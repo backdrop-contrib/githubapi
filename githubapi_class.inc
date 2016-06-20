@@ -710,7 +710,6 @@ class GitHubAPI {
       $url = $this->curl->responseHeaders['Location'];
       $this->curl->get($url);
       $content = $this->curl->response;
-      backdrop_set_message('<pre>' .print_r($this->curl->responseHeaders, true). '</pre>');
       return $content;
     }
     
