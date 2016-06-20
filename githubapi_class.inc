@@ -708,7 +708,8 @@ class GitHubAPI {
 
     if(isset($this->curl->responseHeaders['Location'])) {
       $url = $this->curl->responseHeaders['Location'];
-      $content = $this->getRequest($url, $settings);
+      $this->curl->get($url);
+      $content = $this->curl->response;
       return $content;
     }
     
