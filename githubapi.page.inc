@@ -50,18 +50,19 @@ function githubapi_repos(){
 
 function githubapi_repo_download($form, &$form_state, $rid){
   $repo = gitlc_github_rid_load($rid);
+
+  $form_state['repo'] = $repo;
   
   $githubapi = githubapi_get_class($repo);
   
   if($releases = $githubapi->getReleases()) {
-    backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');
     $options = array();
     
     foreach($releases as $release) {
       $options[$release->tag_name] = $release->name;
     }
   
-    $form['owner_repo_path'] = array(
+    $form['release'] = array(
       '#type' => 'select',
       '#title' => t('Select release to download'),
       '#options' => $options,
@@ -79,10 +80,20 @@ function githubapi_repo_download($form, &$form_state, $rid){
   else{
     backdrop_set_message(t('This repo contain no releases'), 'error');
   }
-  
-  
   return $form;
+}
 
+/**
+ * Submit handler for the githubapi_repo_download_hook() form.
+ */
+function githubapi_repo_download_submit($form, &$form_state) {
+  $repo =  $form_state['repo'];
+  
+  $githubapi = githubapi_get_class($repo);
+  
+  $code = $githubapi->getArchive(array(':ref' => $form_state['values']['release']));
+  
+  file_put_contents("/tmp/". $form_state['values']['release'] . ".zip" , $code);
 }
 
 function githubapi_hook_remove($form, &$form_state, $rid){
