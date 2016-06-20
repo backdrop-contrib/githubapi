@@ -71,6 +71,17 @@ function githubapi_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['admin/config/system/githubapi/%/download'] = array(
+    'title' => 'Download Archive',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('githubapi_repo_download', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Github API configuration.',
+    'file' => 'githubapi.page.inc',
+    'type' => MENU_CALLBACK,
+  );
+
 
   $items['githubapi/register'] = array(
     'type' => MENU_CALLBACK,

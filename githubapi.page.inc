@@ -24,6 +24,10 @@ function githubapi_repos(){
       'title' => t('Delete'),
       'href' => "admin/config/system/githubapi/" . $repo->id . "/delete",
     );
+    $links['download'] = array(
+      'title' => t('Download'),
+      'href' => "admin/config/system/githubapi/" . $repo->id . "/download",
+    );
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
@@ -42,6 +46,68 @@ function githubapi_repos(){
     '#empty' => t('No github repo hooked yet.'),
   );
   return $output;
+}
+
+function githubapi_repo_download($form, &$form_state, $rid){
+  $repo = gitlc_github_rid_load($rid);
+
+  $form_state['repo'] = $repo;
+  
+  $githubapi = githubapi_get_class($repo);
+  
+  if($releases = $githubapi->getReleases()) {
+    $options = array();
+    
+    foreach($releases as $release) {
+      $options[$release->tag_name] = $release->name;
+    }
+  
+    /**
+     * form
+     * 
+     * @var mixed
+     * @access public
+     */
+    $form['release'] = array(
+      '#type' => 'select',
+      '#title' => t('Select release to download'),
+      '#options' => $options,
+      '#description' => t('Please select release to download.'),
+    );
+    $form['actions']['#type'] = 'actions';
+    
+    
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Download'),
+    );
+
+  }
+  else{
+    backdrop_set_message(t('This repo contain no releases'), 'error');
+  }
+  return $form;
+}
+
+/**
+ * Submit handler for the githubapi_repo_download_hook() form.
+ */
+function githubapi_repo_download_submit($form, &$form_state) {
+  $repo =  $form_state['repo'];
+  
+  $githubapi = githubapi_get_class($repo);
+  if($code = $githubapi->getArchive(array(':ref' => $form_state['values']['release']))){
+    backdrop_add_http_header('Pragma', 'public');
+    backdrop_add_http_header('Expires', '0');
+    backdrop_add_http_header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
+    backdrop_add_http_header('Content-Type', 'application/zip');
+    backdrop_add_http_header('Content-Disposition', 'attachment; filename=' . $form_state['values']['release'] . '.zip' . ';');
+    backdrop_add_http_header('Content-Transfer-Encoding', 'binary');
+    backdrop_add_http_header('Content-Length', strlen($code));
+    echo $code;
+    backdrop_exit();
+  }
+  
 }
 
 function githubapi_hook_remove($form, &$form_state, $rid){
