@@ -52,6 +52,7 @@ function githubapi_repo_download($form, &$form_state, $rid){
   $repo = gitlc_github_rid_load($rid);
   
   $githubapi = githubapi_get_class($repo);
+  $githubapi->setDebug(TRUE);
   
   $releases = $githubapi->getRequest('repos/:owner/:repo/releases');
   backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');  
