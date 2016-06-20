@@ -24,6 +24,10 @@ function githubapi_repos(){
       'title' => t('Delete'),
       'href' => "admin/config/system/githubapi/" . $repo->id . "/delete",
     );
+    $links['download'] = array(
+      'title' => t('Download'),
+      'href' => "admin/config/system/githubapi/" . $repo->id . "/download",
+    );
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
@@ -42,6 +46,16 @@ function githubapi_repos(){
     '#empty' => t('No github repo hooked yet.'),
   );
   return $output;
+}
+
+function githubapi_repo_download($form, &$form_state, $rid){
+  $repo = gitlc_github_rid_load($rid);
+  
+  $githubapi = githubapi_get_class($repo);
+  
+  $releases = $githubapi->getRequest('repos/:owner/:repo/releases');
+  backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');  
+
 }
 
 function githubapi_hook_remove($form, &$form_state, $rid){
