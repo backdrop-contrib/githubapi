@@ -731,4 +731,147 @@ class GitHubAPI {
 
     return $this->getRequest('repos/:owner/:repo/releases', $settings);
   }
+
+  /**
+   * Get Release by Tag name.
+   * https://developer.github.com/v3/repos/releases/#get-a-release-by-tag-name
+   *
+   * @param $settings array
+   *   An array of settings for new comment
+   *     - :tag: Tag name for release.
+   *   
+   * @return object
+   *   Release information.
+   *
+   * @see SetRepoName
+   * @see SetOwnerName
+   */
+  public function getRelease($settings) {
+    $settings[':owner'] = $this->owner_name;
+    $settings[':repo'] = $this->repo_name;
+
+    return $this->getRequest('repos/:owner/:repo/releases/tags/:tag', $settings);
+  }
+  
+  /**
+   * Add Asset to release.
+   * https://developer.github.com/v3/repos/releases/#upload-a-release-asset
+   *
+   * @param $settings array
+   *   An array of settings for new comment
+   *     - filename: THe file name, include extension.
+   *     - label: Label to display instead of file.
+   *     - content: The contents of the comment.
+   *     - :tag: Tag name for release.
+   *   
+   * @return object
+   *   Release information.
+   *
+   * @see SetRepoName
+   * @see SetOwnerName
+   */
+   public function addAsset($settings) {
+     
+    $get_release_settings = array(
+      ':tag' => $settings[':tag'],
+    );
+     
+    $release = $this->getRelease($get_release_settings);
+    
+    $upload_url = $release->upload_url;
+    $upload_url = preg_replace('/{.*}/', '', $upload_url);
+    
+    $query = array();
+    $query['name'] = $settings['filename'];
+    if(isset($settings['label'])) {
+      $query['label'] = $settings['label'];
+    }
+    
+    
+    $upload_url = $upload_url . "?" . backdrop_http_build_query($query);
+    
+    
+    $this->curl->setHeader('Content-Type', $this->getMimeType($settings['filename']));
+    $this->curl->setHeader('Authorization', 'token ' . $this->getToken());
+    $this->curl->post($upload_url, $settings['content']);
+    
+    if($this->curl->error){
+      return FALSE;
+    }
+    return TRUE;
+  }
+  
+  /**
+   * Return content type based on file name.
+   * @param $filename string
+   * @return string
+   *   Content type.
+   */
+  private function getMimeType($filename) {
+    $mime_types = array(
+
+      'txt' => 'text/plain',
+      'htm' => 'text/html',
+      'html' => 'text/html',
+      'php' => 'text/html',
+      'css' => 'text/css',
+      'js' => 'application/javascript',
+      'json' => 'application/json',
+      'xml' => 'application/xml',
+      'swf' => 'application/x-shockwave-flash',
+      'flv' => 'video/x-flv',
+
+      // images
+      'png' => 'image/png',
+      'jpe' => 'image/jpeg',
+      'jpeg' => 'image/jpeg',
+      'jpg' => 'image/jpeg',
+      'gif' => 'image/gif',
+      'bmp' => 'image/bmp',
+      'ico' => 'image/vnd.microsoft.icon',
+      'tiff' => 'image/tiff',
+      'tif' => 'image/tiff',
+      'svg' => 'image/svg+xml',
+      'svgz' => 'image/svg+xml',
+
+      // archives
+      'zip' => 'application/zip',
+      'rar' => 'application/x-rar-compressed',
+      'exe' => 'application/x-msdownload',
+      'msi' => 'application/x-msdownload',
+      'cab' => 'application/vnd.ms-cab-compressed',
+
+      // audio/video
+      'mp3' => 'audio/mpeg',
+      'qt' => 'video/quicktime',
+      'mov' => 'video/quicktime',
+
+      // adobe
+      'pdf' => 'application/pdf',
+      'psd' => 'image/vnd.adobe.photoshop',
+      'ai' => 'application/postscript',
+      'eps' => 'application/postscript',
+      'ps' => 'application/postscript',
+
+      // ms office
+      'doc' => 'application/msword',
+      'rtf' => 'application/rtf',
+      'xls' => 'application/vnd.ms-excel',
+      'ppt' => 'application/vnd.ms-powerpoint',
+
+      // open office
+      'odt' => 'application/vnd.oasis.opendocument.text',
+      'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+    );
+    
+    $pathinfo = pathinfo($filename);
+    $ext = $pathinfo['extension'];
+    backdrop_set_message(print_r($pathinfo,true));
+    
+    if(isset($mime_types[$ext])){
+      return $mime_types[$ext];
+    }
+    return 'application/octet-stream';
+  }
+
 }
