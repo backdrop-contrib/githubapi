@@ -704,11 +704,11 @@ class GitHubAPI {
     }
 
     // First request return 302 with linkg to download;
-    $this->getRequest($url);
+    $this->getRequest($url, $settings);
 
     if(isset($this->curl->responseHeaders['Location'])) {
       $url = $this->curl->responseHeaders['Location'];
-      $content = $this->getRequest($url);
+      $content = $this->getRequest($url, $settings);
       return $content;
     }
     
