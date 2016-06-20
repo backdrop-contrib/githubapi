@@ -90,10 +90,16 @@ function githubapi_repo_download_submit($form, &$form_state) {
   $repo =  $form_state['repo'];
   
   $githubapi = githubapi_get_class($repo);
-  
-  $githubapi->setDebug(TRUE);
-  
-  $code = $githubapi->getArchive(array(':ref' => $form_state['values']['release']));
+  if($code = $githubapi->getArchive(array(':ref' => $form_state['values']['release']))){
+   /* backdrop_add_http_header('Pragma', 'public');
+    backdrop_add_http_header('Expires', '0');
+    backdrop_add_http_header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
+    backdrop_add_http_header('Content-Type', 'application/vnd.ms-excel');
+    backdrop_add_http_header('Content-Disposition', 'attachment; filename=' . basename($temp_path . $filename) . ';');
+    backdrop_add_http_header('Content-Transfer-Encoding', 'binary');
+    backdrop_add_http_header('Content-Length', filesize($temp_path . $filename));
+    */
+  }
   
   file_put_contents("/tmp/". $form_state['values']['release'] . ".zip" , $code);
 }
