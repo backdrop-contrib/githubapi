@@ -91,6 +91,8 @@ function githubapi_repo_download_submit($form, &$form_state) {
   
   $githubapi = githubapi_get_class($repo);
   
+  $githubapi->setDebug(TRUE);
+  
   $code = $githubapi->getArchive(array(':ref' => $form_state['values']['release']));
   
   file_put_contents("/tmp/". $form_state['values']['release'] . ".zip" , $code);
