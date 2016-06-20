@@ -94,7 +94,7 @@ function githubapi_repo_download_submit($form, &$form_state) {
     backdrop_add_http_header('Pragma', 'public');
     backdrop_add_http_header('Expires', '0');
     backdrop_add_http_header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
-    backdrop_add_http_header('Content-Type', 'application/vnd.ms-excel');
+    backdrop_add_http_header('Content-Type', 'application/zip');
     backdrop_add_http_header('Content-Disposition', 'attachment; filename=' . $form_state['values']['release'] . '.zip' . ';');
     backdrop_add_http_header('Content-Transfer-Encoding', 'binary');
     backdrop_add_http_header('Content-Length', strlen($code));
