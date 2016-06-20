@@ -51,12 +51,13 @@ function githubapi_repos(){
 function githubapi_repo_download($form, &$form_state, $rid){
   $repo = gitlc_github_rid_load($rid);
   
-  backdrop_set_message('<pre>REPO: ' . print_r($repo,true). '</pre>'); 
+//  backdrop_set_message('<pre>REPO: ' . print_r($repo,true). '</pre>'); 
   
   $githubapi = githubapi_get_class($repo);
-  $githubapi->setDebug(TRUE);
+//  $githubapi->setDebug(TRUE);
+
   
-  $releases = $githubapi->getRequest('repos/:owner/:repo/releases');
+  $releases = $githubapi->getReleases();
   backdrop_set_message('<pre>' . print_r($releases,true). '</pre>');  
 
 }

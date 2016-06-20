@@ -714,4 +714,20 @@ class GitHubAPI {
     
     return FALSE;
   }
+  /**
+   * Get Releases list for repo.
+   * https://developer.github.com/v3/repos/releases/#list-releases-for-a-repository
+   *
+   * @return array
+   *   List of releases.
+   *
+   * @see SetRepoName
+   * @see SetOwnerName
+   */
+  public function getReleases() {
+    $settings[':owner'] = $this->owner_name;
+    $settings[':repo'] = $this->repo_name;
+    
+    return $this->getRequest('repos/:owner/:repo/releases', $settings);
+  }
 }
