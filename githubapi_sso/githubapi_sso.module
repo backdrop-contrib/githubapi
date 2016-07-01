@@ -52,14 +52,16 @@ function githubapi_sso_user_view($account, $view_mode, $langcode) {
     ->execute()
     ->fetchObject();
 
-  if($user->uid == $account->uid){
-    if($githubapi_sso){
+  if ($user->uid == $account->uid) {
+    if ($githubapi_sso) {
       $githubapi_sso_status = backdrop_get_form('githubapi_sso_unlink', $githubapi_sso);
-    }else{
+    }
+    else {
       $githubapi_sso_status = backdrop_get_form('githubapi_sso_link', $account);
     }
-  }else{
-    if($githubapi_sso){
+  }
+  else {
+    if ($githubapi_sso) {
       $githubapi_sso_status = array(
         '#markup' => t('Connected to GitHub account !name',
           array('!name' => l($githubapi_sso->name, 'https://github.com/' . $githubapi_sso->name))),
@@ -84,7 +86,7 @@ function githubapi_sso_form_user_login_alter(&$form, &$form_state, $form_id) {
     '#type' => 'submit',
     '#value' => t('Login with GitHub account'),
   );
-  
+
   $form['#validate'][] = 'githubapi_sso_login_validate';
 
 }
@@ -105,7 +107,7 @@ function githubapi_sso_link($form, &$form_state, $account) {
  * We use validation step to redirect user before user_login validate happen.
  */
 function githubapi_sso_login_validate($form, &$form_state) {
-  if($form_state['clicked_button']['#id'] == 'edit-githubapi-sso' ) {
+  if ($form_state['clicked_button']['#id'] == 'edit-githubapi-sso') {
     // Before redirect to github, let's clear session error from user login validation.
     unset($_SESSION['messages']['error']);
     githubapi_sso_redirect_to_github();
@@ -126,7 +128,7 @@ function githubapi_sso_redirect_to_github() {
   $params = array();
 
   $client_id = settings_get('githubapi_client_id');
-  if(empty($client_id)){
+  if (empty($client_id)) {
     $client_id = $config->get('client_id');
   }
   $params['client_id'] = $client_id;
@@ -175,12 +177,12 @@ function githubapi_sso_get_access_token() {
     $config = config('githubapi.settings');
 
     $client_id = settings_get('githubapi_client_id');
-    if(empty($client_id)){
+    if (empty($client_id)) {
       $client_id = $config->get('client_id');
     }
 
     $client_secret = settings_get('githubapi_client_secret');
-    if(empty($client_secret)){
+    if (empty($client_secret)) {
       $client_secret = $config->get('client_secret');
     }
 
@@ -197,10 +199,10 @@ function githubapi_sso_get_access_token() {
     if (isset($result['access_token'])) {
       $token = $result['access_token'];
       $user_info = githubapi_sso_get_user_info($token);
-      if($user->uid > 0) {
+      if ($user->uid > 0) {
         github_sso_assign($user_info);
       }
-      else{
+      else {
         github_sso_login($user_info, $token);
       }
     }
@@ -215,7 +217,7 @@ function githubapi_sso_get_access_token() {
  *
  * @param $user_info array that contain github user data.
  */
-function github_sso_assign($user_info){ 
+function github_sso_assign($user_info) {
   // We need to check if it's already used.
   $githubapi_sso = db_select('githubapi_sso_login', 'gsl')
     ->fields('gsl')
@@ -223,13 +225,13 @@ function github_sso_assign($user_info){
     ->execute()
     ->fetchObject();
 
-  if($githubapi_sso) {
+  if ($githubapi_sso) {
     // This login already assigned.
     backdrop_set_message(t('This github login already assigned to another user.'), 'error');
     backdrop_set_message(t('Failed connecting to GitHub.'), 'error');
     backdrop_goto('user');
   }
-  else{
+  else {
     db_insert('githubapi_sso_login')
       ->fields(array(
         'uid' => $user->uid,
@@ -246,7 +248,7 @@ function github_sso_assign($user_info){
  *
  * @param $user_info array that contain github user data.
  */
-function github_sso_login($user_info){
+function github_sso_login($user_info) {
   global $user;
   $githubapi_sso = db_select('githubapi_sso_login', 'gsl')
     ->fields('gsl')
@@ -254,32 +256,32 @@ function github_sso_login($user_info){
     ->execute()
     ->fetchObject();
 
-  if($githubapi_sso) {
+  if ($githubapi_sso) {
     // This login already assigned.
     $account = user_load($githubapi_sso->uid);
-    if($account->status == 1){
+    if ($account->status == 1) {
       $user = $account;
       user_login_finalize();
       backdrop_goto('user');
     }
-    else{
+    else {
       backdrop_set_message(t('The account for %name has not been activated or is blocked.', array('%name' => $account->name)), 'error');
       backdrop_goto('');
     }
   }
-  else{
+  else {
     // This login is not assigned and we are not logged in.
     // Sounds like new user are registerring.
     $account = user_load_by_name($user_info['login']);
 
-    if($account){
+    if ($account) {
       backdrop_set_message(t('Login !name already registered. Please login or register first.', array('!name' => $user_info['login'])));
       backdrop_goto('');
     }
 
     $account = user_load_by_mail($user_info['email']);
 
-    if($account){
+    if ($account) {
       backdrop_set_message(t('Email !name already registered. Please login or register first.', array('!name' => $user_info['email'])));
       backdrop_goto('');
     }
@@ -303,7 +305,10 @@ function github_sso_login($user_info){
       ))
       ->execute();
 
-    watchdog('user', 'New user: %name (%email).', array('%name' => $account->name, '%email' => $account->mail), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $account->uid . '/edit'));
+    watchdog('user', 'New user: %name (%email).', array(
+      '%name' => $account->name,
+      '%email' => $account->mail
+    ), WATCHDOG_NOTICE, l(t('edit'), 'user/' . $account->uid . '/edit'));
 
     if (!config_get('system.core', 'user_email_verification') && $account->status) {
       _user_mail_notify('register_no_approval_required', $account);
