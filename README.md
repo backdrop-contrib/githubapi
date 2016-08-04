@@ -39,44 +39,46 @@ When issue #8 will be implemented, I am going to release Beta1.
     - Create an account on github.com like "MyApp BOT". Then give this user admin access to your organization or/and your repositories. Then click "Authorize an Application" and do so via your "MyApp Bot" account.
     
 ##Using examples
- After you properly configured module, your website become a backend for your github APP. Now you can install webhook via admin/config/system/githubapi to your repositories or organisations.
- Type orgname or orgname/reponame into hook form at the top.
- When you click "Hook up", Webhook will be automatically created for your Organisation or Repository if "MyApp BOT" user (or whatever you used to Authorize your app) has admin access to this organisation or repository.
+After you properly configured module, your website become a backend for your github APP. Now you can install webhook via admin/config/system/githubapi to your repositories or organisations.
+Type orgname or orgname/reponame into hook form at the top.
+When you click "Hook up", Webhook will be automatically created for your Organisation or Repository if "MyApp BOT" user (or whatever you used to Authorize your app) has admin access to this organisation or repository.
  
  Time to create custom module that implements hook_githubapi_payload($event_name, $record, $repo). Example:
+
  ```
 /**
  * Implements hook_githubapi_payload().
  */
-function github_issues_githubapi_payload($event_name, $record, $repo){
+function github_issues_githubapi_payload($event_name, $record, $repo) {
+  $payload = $record['data'];
   $expr = '/(?<!\S)#([0-9]*)/i';
 
   switch ($event_name) {
     case 'push':
-      foreach($payload['data']['commits'] as $commit){
+      foreach ($payload['data']['commits'] as $commit) {
         $match = NULL;
         $message = '';
         preg_match_all($expr, $commit['message'], $match);
-        if(!empty($match[1])){
-          foreach($match[1] as $issue){
+        if (!empty($match[1])) {
+          foreach ($match[1] as $issue) {
             $message .= GITHUB_ISSUES_ISSUES_REPO . '#' . $issue . " ";
           }
-          if(!empty($message)){
+          if (!empty($message)) {
             borg_github_issues_commit_comment_add($commit['id'], $message, $repo);
           }
         }
       }
       break;
     case 'pull_request':
-      if($payload['data']['action'] == 'opened'){
+      if ($payload['data']['action'] == 'opened') {
         $message = '';
         preg_match_all($expr, $payload['data']['pull_request']['title'] . ' ' . $payload['pull_request']['body'], $match);
-        if(!empty($match[1])){
-          foreach($match[1] as $issue){
+        if (!empty($match[1])) {
+          foreach ($match[1] as $issue) {
             $message .= GITHUB_ISSUES_ISSUES_REPO . '#' . $issue . " ";
           }
 
-          if(!empty($message)){
+          if (!empty($message)) {
             borg_github_issues_issue_comment_add($payload['number'], $message, $repo);
           }
         }
