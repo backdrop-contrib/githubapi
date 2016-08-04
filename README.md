@@ -25,8 +25,8 @@ When issue #8 will be implemented, I am going to release Beta1.
   
     Optionally you can store client_id and client_secret via settings.php
     ```
-    $settings['githubapi_client_secret'] = 'YOUR_APP_CLIENT_SECRET';
     $settings['githubapi_client_id'] = 'YOUR_APP_CLIENT_ID';
+    $settings['githubapi_client_secret'] = 'YOUR_APP_CLIENT_SECRET';
     ```
     When client_id or client_secret stored via settings.php , you are not able to edit it on settings page.
     
