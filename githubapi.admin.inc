@@ -149,7 +149,7 @@ function githubapi_revoke_submit($form, &$form_state) {
       backdrop_set_message(t('Unexpected Basic authorization error. Make sure that client_id and client_secret is properly set.'), 'error');
       break;
     default:
-      backdrop_set_message(t('Unexpected behaviour. Debug data: status_message = !error.', array('!error' => $result->error), 'error'));
+      backdrop_set_message(t('Unexpected behaviour. Debug data: status_message = !error.', array('!error' => $result->error)), 'error');
 
   }
 }
