@@ -829,8 +829,9 @@ class GitHubAPI {
    *   An array of settings for new comment
    *     - :tag: Tag name for release.
    *
-   * @return object
-   *   Release information.
+   * @return stdClass|FALSE
+   *   The newly added asset information response from GitHub. Or FALSE if the
+   *   asset upload failed.
    *
    * @see SetRepoName
    * @see SetOwnerName
@@ -853,8 +854,9 @@ class GitHubAPI {
    *     - content: The contents of the comment.
    *     - :tag: Tag name for release.
    *
-   * @return object
-   *   Release information.
+   * @return stdClass|FALSE
+   *   The newly added asset information response from GitHub. Or FALSE if the
+   *   asset upload failed.
    *
    * @see SetRepoName
    * @see SetOwnerName
@@ -881,12 +883,12 @@ class GitHubAPI {
     $this->reInitCurl();
     $this->curl->setHeader('Content-Type', $this->getMimeType($settings['filename']));
     $this->curl->setHeader('Authorization', 'token ' . $this->getToken());
-    $this->curl->post($upload_url, $settings['content']);
+    $response = $this->curl->post($upload_url, $settings['content']);
 
     if ($this->curl->error) {
       return FALSE;
     }
-    return TRUE;
+    return $response;
   }
 
   /**
