@@ -1,12 +1,12 @@
-#GitHubapi - GitHub API integration module
-This module provide API and settings to connect your website with your GitHub organisations and repositories via GitHub API and GitHub Application.
+# GitHubapi - GitHub API integration module
+This module provides an API and settings to connect your website with your GitHub organisations and repositories via GitHub API and GitHub Application.
 
 ## Under active development
 It's early alpha release. GitHubAPI class is limited now to fullfill backdropcms.org needs only.
 When issue #8 will be implemented, I am going to release Beta1.
 
 
-##Installation
+## Installation
   - Install this module using the official Backdrop CMS instructions at
   https://backdropcms.org/guide/modules
   - Install https://github.com/php-curl-class/php-curl-class to libraries
