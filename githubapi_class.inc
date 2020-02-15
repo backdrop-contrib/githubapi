@@ -101,6 +101,7 @@ class GitHubAPI {
     $this->curl->setHeader('Content-Type', 'application/json');
     $this->curl->setUserAgent('Backdrop CMS GitHub API module');
     $this->curl->setHeader('Accept', '*/*');
+    $this->curl->setHeader('Authorization', 'token' . $this->getToken());
   }
 
   /**
@@ -379,10 +380,6 @@ class GitHubAPI {
    */
   public function getRequest($command, $params = array(), $headers = array()) {
     $this->prepareCommand($command, $params);
-
-    if ($this->getToken()) {
-      $params['access_token'] = $this->getToken();
-    }
 
     // Add default 1000 per page.
     $params['per_page'] = $this->per_page;
