@@ -1,4 +1,4 @@
-#GitHubapi - GitHub API integration module
+# GitHubapi - GitHub API integration module
 This module provide API and settings to connect your website with your GitHub organisations and repositories via GitHub API and GitHub Application.
 
 ## Under active development
@@ -6,7 +6,7 @@ It's early alpha release. GitHubAPI class is limited now to fullfill backdropcms
 When issue #8 will be implemented, I am going to release Beta1.
 
 
-##Installation
+## Installation
   - Install this module using the official Backdrop CMS instructions at
   https://backdropcms.org/guide/modules
   - Install https://github.com/php-curl-class/php-curl-class to libraries
@@ -15,6 +15,7 @@ When issue #8 will be implemented, I am going to release Beta1.
   cd libraries
   git clone https://github.com/php-curl-class/php-curl-class.git
   ```
+  
   - Create GitHub Application via https://github.com
 
     There is two way to do so.
@@ -24,10 +25,12 @@ When issue #8 will be implemented, I am going to release Beta1.
   - Save settings on admin/config/system/githubapi/settings
 
     Optionally you can store client_id and client_secret via settings.php
-    ```
+  
+    ```php
     $settings['githubapi_client_id'] = 'YOUR_APP_CLIENT_ID';
     $settings['githubapi_client_secret'] = 'YOUR_APP_CLIENT_SECRET';
     ```
+    
     When client_id or client_secret stored via settings.php , you are not able to edit it on settings page.
 
   - setup private filesystem path. We are caching each GET request to GitHubAPI for AGE provided by answer.
@@ -45,7 +48,7 @@ When you click "Hook up", Webhook will be automatically created for your Organis
 
 Time to create custom module that implements hook_githubapi_payload($event_name, $record, $repo). Example:
 
-```
+```php
 /**
  * Implements hook_githubapi_payload().
  */
@@ -89,6 +92,6 @@ function github_issues_githubapi_payload($event_name, $record, $repo) {
 ```
 
 
-##License
+## License
 This project is GPL v2 software. See the LICENSE.txt file in this directory for
 complete text.
