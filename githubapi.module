@@ -23,7 +23,7 @@ define('GITHUB_API_USER_AGENT', 'Backdrop CMS GitHub API module');
  */
 function githubapi_config_info() {
   $prefixes['githubapi.settings'] = array(
-    'label' => t('github API settings'),
+    'label' => t('GitHub API Settings'),
     'group' => t('Configuration'),
   );
   return $prefixes;
@@ -36,7 +36,7 @@ function githubapi_menu() {
   $items = array();
 
   $items['admin/config/system/githubapi'] = array(
-    'title' => 'github API settings',
+    'title' => 'GitHub API Settings',
     'page callback' => 'githubapi_repos',
     'access callback' => 'user_access',
     'access arguments' => array('administer site configuration'),
@@ -50,7 +50,7 @@ function githubapi_menu() {
   );
 
   $items['admin/config/system/githubapi/settings'] = array(
-    'title' => 'github API settings',
+    'title' => 'GitHub API Settings',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('githubapi_admin_settings'),
     'access callback' => 'user_access',

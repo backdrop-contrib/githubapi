@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administration pages provided by github API module.
+ * Administration pages provided by GitHub API module.
  */
 
 /**
@@ -42,7 +42,7 @@ function githubapi_repos() {
     '#theme' => 'table__githubapi_repos',
     '#rows' => $rows,
     '#header' => $header,
-    '#empty' => t('No github repo hooked yet.'),
+    '#empty' => t('No GitHub repositories hooked yet.'),
   );
   return $output;
 }
@@ -143,19 +143,7 @@ function githubapi_hook_remove_submit($form, &$form_state) {
   $repo = $form_state['repo'];
   $hook = $form_state['hook'];
 
-  module_load_include('inc', 'githubapi', 'githubapi_class');
-  $config = config('githubapi.settings');
-
-  $token = settings_get('githubapi_token');
-  if (empty($token)) {
-    $token = $config->get('token');
-  }
-
-  $githubapi = new GitHubAPI();
-
-  $githubapi->setOwnerName($repo['owner']);
-  $githubapi->setRepoName($repo['name']);
-  $githubapi->setToken($token);
+  $githubapi = githubapi_get_class($repo);
 
   if ($repo['name'] == '*') {
     $answer = $githubapi->deleteOrgHook($hook['hook_id']);
@@ -286,10 +274,6 @@ function githubapi_hook_submit($form, &$form_state) {
     );
     $githubapi->reInitCurl();
     $hook = $githubapi->createOrgHook($settings);
-    if ($hook->message == 'Not Found') {
-      backdrop_set_message(t('You don\'t have right to add hook to !org organisation', array('!org' => $org)), 'error');
-      return;
-    }
 
     $data = new stdClass;
     $data->id = 0;
@@ -299,6 +283,10 @@ function githubapi_hook_submit($form, &$form_state) {
     $data->cache = $org_data;
   }
 
+  if ($hook->message === 'Not Found') {
+    backdrop_set_message(t('The repository/organization either was not found or you do not have access to it.'), 'error');
+    return;
+  }
 
   if ($hook) {
     $rid = db_insert('githubapi_repositories')

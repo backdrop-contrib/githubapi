@@ -1,10 +1,10 @@
 # GitHubapi - GitHub API integration module
-This module provide API and settings to connect your website with your GitHub organisations and repositories via GitHub API and GitHub Application.
+
+This module provides API and settings to connect your website with your GitHub organizations and repositories via the GitHub API and GitHub Applications.
 
 ## Under active development
-It's early alpha release. GitHubAPI class is limited now to fullfill backdropcms.org needs only.
+It's early alpha release. GitHubAPI class is limited to fulfill backdropcms.org needs only.
 When issue #8 will be implemented, I am going to release Beta1.
-
 
 ## Installation
   - Install this module using the official Backdrop CMS instructions at
@@ -15,13 +15,14 @@ When issue #8 will be implemented, I am going to release Beta1.
   cd libraries
   git clone https://github.com/php-curl-class/php-curl-class.git
   ```
-  
   - Create GitHub Application via https://github.com
-
-    There is two way to do so.
+    
+    There are two ways to do so. 
     - Via your profile: https://github.com/settings/applications/new
     - Via your organization profile: https://github.com/organizations/ORGNAME/settings/applications/new
-
+    
+    The "Authorization callback URL" will be: http://yoursite.com/githubapi/register
+  
   - Save settings on admin/config/system/githubapi/settings
 
     Optionally you can store client_id and client_secret via settings.php
@@ -31,17 +32,17 @@ When issue #8 will be implemented, I am going to release Beta1.
     $settings['githubapi_client_secret'] = 'YOUR_APP_CLIENT_SECRET';
     ```
     
-    When client_id or client_secret stored via settings.php , you are not able to edit it on settings page.
+    When client_id or client_secret stored via settings.php, you will not able to edit it in the UI.
 
-  - setup private filesystem path. We are caching each GET request to GitHubAPI for AGE provided by answer.
-
-  - Now you need to provide token to your GitHub Application, and there is two way:
+  - Set up the private filesystem path. We are caching each GET request to GitHubAPI for AGE provided by answer.
+  
+  - Now you need to provide token to your GitHub Application, and there are two ways:
     - Just click "Authorize an Application" on admin/config/system/githubapi/settings page and grant access to your account token.
-    This way any comments or other actions via GitHubAPI will be from your name.
-
+      This way any comments or other actions via GitHubAPI will be from your name.
+    
     - Create an account on github.com like "MyApp BOT". Then give this user admin access to your organization or/and your repositories. Then click "Authorize an Application" and do so via your "MyApp Bot" account.
 
-##Using examples
+## Using examples
 After you properly configured module, your website become a backend for your GitHub APP. Now you can install webhook via admin/config/system/githubapi to your repositories or organisations.
 Type orgname or orgname/reponame into hook form at the top.
 When you click "Hook up", Webhook will be automatically created for your Organisation or Repository if "MyApp BOT" user (or whatever you used to Authorize your app) has admin access to this organisation or repository.
@@ -90,7 +91,6 @@ function github_issues_githubapi_payload($event_name, $record, $repo) {
   }
 }
 ```
-
 
 ## License
 This project is GPL v2 software. See the LICENSE.txt file in this directory for
