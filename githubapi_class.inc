@@ -101,6 +101,7 @@ class GitHubAPI {
     $this->curl->setHeader('Content-Type', 'application/json');
     $this->curl->setUserAgent('Backdrop CMS GitHub API module');
     $this->curl->setHeader('Accept', '*/*');
+    $this->curl->setHeader('Authorization', 'token ' . $this->getToken());
   }
 
   /**
@@ -380,10 +381,6 @@ class GitHubAPI {
   public function getRequest($command, $params = array(), $headers = array()) {
     $this->prepareCommand($command, $params);
 
-    if ($this->getToken()) {
-      $params['access_token'] = $this->getToken();
-    }
-
     // Add default 1000 per page.
     $params['per_page'] = $this->per_page;
 
@@ -408,7 +405,7 @@ class GitHubAPI {
    *
    * @access protected
    * @param $command
-   *   String value. GitHub API url with tokens like :owner, :repo and ect.
+   *   String value. GitHub API url with tokens like :owner, :repo and etc.
    * @param $params array
    *   Values for request and tokens for request url. LIke :owner, :repo, :id and etc.
    * @return stdClass|FALSE
@@ -419,13 +416,8 @@ class GitHubAPI {
     //$params['committer'] = $this->getCommittrer();
     $this->prepareCommand($command, $params);
 
-    $query = '';
-    if ($this->getToken()) {
-      $query = '?access_token=' . $this->getToken();
-    }
-
     $this->reInitCurl();
-    $this->curl->put(GITHUB_API_URI . '/' . $command . $query, $params);
+    $this->curl->put(GITHUB_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -444,12 +436,8 @@ class GitHubAPI {
   public function postRequest($command, $params = array()) {
 
     $this->prepareCommand($command, $params);
-    $query = '';
-    if ($this->getToken()) {
-      $query = '?access_token=' . $this->getToken();
-    }
     $this->reInitCurl();
-    $this->curl->post(GITHUB_API_URI . '/' . $command . $query, $params);
+    $this->curl->post(GITHUB_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -466,17 +454,11 @@ class GitHubAPI {
    *   FALSE if request failed. Object if success.
    */
   public function deleteRequest($command, $params = array()) {
-
     $this->prepareCommand($command, $params);
-
-    $query = '';
-    if ($this->getToken()) {
-      $query = '?access_token=' . $this->getToken();
-    }
-
     $this->reInitCurl();
-    $this->curl->delete(GITHUB_API_URI . '/' . $command . $query, $params);
+    $this->curl->delete(GITHUB_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
+
     return $response;
   }
 
@@ -486,7 +468,7 @@ class GitHubAPI {
    *
    * @access private
    * @param $command
-   *   String value. GitHub API url with tokens like :owner, :repo and ect.
+   *   String value. GitHub API url with tokens like :owner, :repo and etc.
    * @param $params array
    *   Values for request and tokens for request url. LIke :owner, :repo, :id and etc.
    */
