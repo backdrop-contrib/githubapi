@@ -48,7 +48,7 @@ function githubapi_repos() {
 }
 
 function githubapi_repo_download($form, &$form_state, $rid) {
-  $repo = gitlc_github_rid_load($rid);
+  $repo = githubapi_repo_load($rid);
 
   $form_state['repo'] = $repo;
 
@@ -61,21 +61,14 @@ function githubapi_repo_download($form, &$form_state, $rid) {
       $options[$release->tag_name] = $release->name;
     }
 
-    /**
-     * form
-     *
-     * @var mixed
-     * @access public
-     */
     $form['release'] = array(
       '#type' => 'select',
       '#title' => t('Select release to download'),
       '#options' => $options,
       '#description' => t('Please select release to download.'),
     );
+
     $form['actions']['#type'] = 'actions';
-
-
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Download'),
@@ -83,7 +76,7 @@ function githubapi_repo_download($form, &$form_state, $rid) {
 
   }
   else {
-    backdrop_set_message(t('This repo contain no releases'), 'error');
+    backdrop_set_message(t('This repository contain no releases.'), 'error');
   }
   return $form;
 }
@@ -110,7 +103,7 @@ function githubapi_repo_download_submit($form, &$form_state) {
 }
 
 function githubapi_hook_remove($form, &$form_state, $rid) {
-  $repo = gitlc_github_rid_load($rid);
+  $repo = githubapi_repo_load($rid);
 
   $hook = db_select('githubapi_hooks', 'gh')
     ->fields('gh')
@@ -128,6 +121,8 @@ function githubapi_hook_remove($form, &$form_state, $rid) {
   $form['message'] = array(
     '#markup' => t('Are you sure want to delete this repo from this app?'),
   );
+
+  $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
@@ -171,8 +166,9 @@ function githubapi_hook() {
   $form['owner_repo_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Please provide owner or owner/repo'),
-    '#description' => t('Please provide owner or owner/repo to install webhook.'),
+    '#description' => t('Formatted as "organization-name" or "username/repository-name".'),
   );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -228,7 +224,6 @@ function githubapi_hook_submit($form, &$form_state) {
           'release',
           'issues',
           'issue_comment',
-          'follow',
           'fork',
           'status',
           'commit_comment',
@@ -285,6 +280,12 @@ function githubapi_hook_submit($form, &$form_state) {
 
   if ($hook->message === 'Not Found') {
     backdrop_set_message(t('The repository/organization either was not found or you do not have access to it.'), 'error');
+    return;
+  }
+  elseif (isset($hook->errors)) {
+    foreach ($hook->errors as $error) {
+      backdrop_set_message(t('The registration of this site as an app failed. Error from GitHub: @error.', array('@error' => $error->message)), 'error');
+    }
     return;
   }
 

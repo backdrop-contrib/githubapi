@@ -368,7 +368,7 @@ class GitHubAPI {
   /**
    * Perform GET request to GitHub API and return answer.
    *
-   * @access protected
+   * @access public
    * @param string $command
    *   String value. GitHub API url with tokens like :owner, :repo and ect.
    * @param array $params
@@ -403,7 +403,7 @@ class GitHubAPI {
   /**
    * Perform PUT request to GitHub API and return answer.
    *
-   * @access protected
+   * @access public
    * @param $command
    *   String value. GitHub API url with tokens like :owner, :repo and etc.
    * @param $params array
@@ -425,7 +425,7 @@ class GitHubAPI {
   /**
    * Perform POST request to GitHub API and return answer.
    *
-   * @access protected
+   * @access public
    * @param $command
    *   String value. GitHub API url with tokens like :owner, :repo and ect.
    * @param $params array
@@ -445,7 +445,7 @@ class GitHubAPI {
   /**
    * Perform DELETE request to GitHub API and return answer.
    *
-   * @access protected
+   * @access public
    * @param $command
    *   String value. GitHub API url with tokens like :owner, :repo and ect.
    * @param $params array
@@ -474,7 +474,7 @@ class GitHubAPI {
    */
   private function prepareCommand(&$command, &$params) {
     foreach ($params as $key => $val) {
-      if ($key[0] == ':') {
+      if (strpos($key, ':') === 0) {
         $command = str_replace($key, $val, $command);
         unset($params[$key]);
       }
@@ -773,7 +773,7 @@ class GitHubAPI {
       $url = 'repos/:owner/:repo/:archive_format/:ref';
     }
 
-    // First request return 302 with linkg to download;
+    // First request returns a 302 with link to download;
     $this->getRequest($url, $settings);
 
     if (isset($this->curl->responseHeaders['Location'])) {
@@ -844,7 +844,6 @@ class GitHubAPI {
    * @see SetOwnerName
    */
   public function addAsset($settings) {
-
     $get_release_settings = array(
       ':tag' => $settings[':tag'],
     );
@@ -864,7 +863,6 @@ class GitHubAPI {
 
     $this->reInitCurl();
     $this->curl->setHeader('Content-Type', $this->getMimeType($settings['filename']));
-    $this->curl->setHeader('Authorization', 'token ' . $this->getToken());
     $response = $this->curl->post($upload_url, $settings['content']);
 
     if ($this->curl->error) {

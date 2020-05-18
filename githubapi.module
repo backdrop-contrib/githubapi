@@ -101,7 +101,15 @@ function githubapi_menu() {
   return $items;
 }
 
-function gitlc_github_rid_load($rid) {
+/**
+ * Load a repository from the database.
+ *
+ * @param int $rid
+ *   The repository ID.
+ *
+ * @return array|FALSE
+ */
+function githubapi_repo_load($rid) {
   return db_select('githubapi_repositories', 'gr')
     ->fields('gr')
     ->condition('id', $rid)
@@ -203,15 +211,8 @@ function githubapi_payload_process() {
       exit('The provided secret key did not match the server key.');
     }
     if ($event_name) {
-      $sender = $event['sender'];
-      $repository = $event['repository'];
-
-      unset($event['repository']);
-      unset($event['sender']);
-
       $record = array(
         'type' => $event_name,
-        'sender' => $sender,
         'rid' => $repo['id'],
         'data' => $event,
         'timestamp' => REQUEST_TIME,
@@ -233,11 +234,7 @@ function githubapi_payload_process() {
 function githubapi_get_class($repo) {
   module_load_include('inc', 'githubapi', 'githubapi_class');
 
-  $config = config('githubapi.settings');
-  $token = settings_get('githubapi_token');
-  if (empty($token)) {
-    $token = $config->get('token');
-  }
+  $token = githubapi_get_token();
 
   $githubapi = new GitHubAPI();
   $githubapi->setOwnerName($repo['owner']);
