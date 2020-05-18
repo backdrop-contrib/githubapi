@@ -102,6 +102,17 @@ function githubapi_menu() {
 }
 
 /**
+ * Implements hook_cron().
+ *
+ * Remove old payloads from the database table.
+ */
+function githubapi_cron() {
+  $cache_lifetime = config_get('githubapi.settings', 'payload_lifetime');
+  $older_than = REQUEST_TIME - $cache_lifetime;
+  db_query('DELETE FROM {githubapi_payload} WHERE timestamp < :time', array(':time' => $older_than));
+}
+
+/**
  * Load a repository from the database.
  *
  * @param int $rid

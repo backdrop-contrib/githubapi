@@ -203,3 +203,12 @@ function githubapi_update_1004() {
     db_drop_field('githubapi_payload', 'sender');
   }
 }
+
+/**
+ * Add default setting for payload lifetime (1 week).
+ */
+function githubapi_update_1005() {
+  if (config_get('githubapi.settings', 'payload_lifetime') === NULL) {
+    config_set('githubapi.settings', 'payload_lifetime', 604800);
+  }
+}
